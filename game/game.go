@@ -8,9 +8,9 @@ package game
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
-	sdlimg "github.com/veandco/go-sdl2/sdl_image"
-	sdlmix "github.com/veandco/go-sdl2/sdl_mixer"
-	sdlttf "github.com/veandco/go-sdl2/sdl_ttf"
+	sdlimg "github.com/veandco/go-sdl2/img"
+	sdlmix "github.com/veandco/go-sdl2/mix"
+	sdlttf "github.com/veandco/go-sdl2/ttf"
 )
 
 // Config is the game configuration.

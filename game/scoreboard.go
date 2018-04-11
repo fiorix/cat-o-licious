@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 
 	"github.com/veandco/go-sdl2/sdl"
-	sdlttf "github.com/veandco/go-sdl2/sdl_ttf"
+	sdlttf "github.com/veandco/go-sdl2/ttf"
 )
 
 // Scoreboard tracks the player's score and draws the scoreboard.
@@ -55,7 +55,7 @@ func (sb *scoreboard) Points() int64 {
 func (sb *scoreboard) Draw(viewport *sdl.Rect) {
 	p := atomic.LoadInt64(&sb.points)
 	text := fmt.Sprintf("%d", p)
-	s, err := sb.f.RenderUTF8_Solid(text, sdl.Color{R: 255})
+	s, err := sb.f.RenderUTF8Solid(text, sdl.Color{R: 255})
 	if err != nil {
 		log.Println("failed to create font surface:", err)
 		return

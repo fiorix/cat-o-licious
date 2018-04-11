@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/veandco/go-sdl2/sdl"
-	sdlimg "github.com/veandco/go-sdl2/sdl_image"
+	sdlimg "github.com/veandco/go-sdl2/img"
 )
 
 // Image is a wrapper for SDL images.
