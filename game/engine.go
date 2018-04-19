@@ -83,24 +83,26 @@ loop:
 			sdl.Delay(1000)
 			continue
 		}
-		switch ev.(type) {
+		switch t := ev.(type) {
 		case *sdl.QuitEvent:
 			break loop
 		case *sdl.KeyboardEvent:
-			switch ev.(*sdl.KeyboardEvent).Keysym.Sym {
-			case sdl.K_q:
-				break loop
-			case sdl.K_f:
-				if fullscreen {
-					e.w.SetFullscreen(0)
-				} else {
-					e.w.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+			if t.State == sdl.PRESSED {
+				switch ev.(*sdl.KeyboardEvent).Keysym.Sym {
+				case sdl.K_q:
+					break loop
+				case sdl.K_f:
+					if fullscreen {
+						e.w.SetFullscreen(0)
+					} else {
+						e.w.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+					}
+					fullscreen = !fullscreen
+				case sdl.K_LEFT, sdl.K_a:
+					p.Move(Left, playerSpeed)
+				case sdl.K_RIGHT, sdl.K_d:
+					p.Move(Right, playerSpeed)
 				}
-				fullscreen = !fullscreen
-			case sdl.K_LEFT, sdl.K_a:
-				p.Move(Left, playerSpeed)
-			case sdl.K_RIGHT, sdl.K_d:
-				p.Move(Right, playerSpeed)
 			}
 		}
 	}
