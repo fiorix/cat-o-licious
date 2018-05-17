@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 
 	"github.com/veandco/go-sdl2/sdl"
-	sdlmix "github.com/veandco/go-sdl2/sdl_mixer"
+	sdlmix "github.com/veandco/go-sdl2/mix"
 )
 
 // Direction is the player's lateral movement direction.

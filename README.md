@@ -4,19 +4,38 @@ This is a simple cat game written in Go and SDL, inspired by [flappy](https://gi
 
 ### Install
 
-It's been only tested on MacOS, and requires the [SDL](https://www.libsdl.org) library and Go bindings:
+It's been tested on MacOS and Linux, requires the [SDL2](https://www.libsdl.org) library and Go bindings.
+
+Bindings:
+
+```
+go get -v github.com/veandco/go-sdl2/{sdl,img,mix,ttf}
+```
+More information on [go-sdl2](https://github.com/veandco/go-sdl2#installation)
+
+SDL2 dependencies on MacOS:
 
 ```
 brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf pkgconfig
-go get github.com/fiorix/cat-o-licious
 ```
 
+On VoidLinux:
+```
+sudo xbps-install -S SDL2-devel SDL2_image-devel SDL2_mixer-devel SDL2_ttf-devel
+```
+
+Get the code:
+
+```
+go get github.com/fiorix/cat-o-licious
+```
 The assets directory must be relative to the path of the binary. Assets include fonts, images, and sounds used by the game. The font was copied from flappy, images randomly downloaded from the Internet (by them), and the game soundtrack is my daughter's composition in Garage Band. Go figure.
 
-Run:
+Install and run:
 
 ```
 cd $GOPATH/src/github.com/fiorix/cat-o-licious
+go build github.com/fiorix/cat-o-licious
 ./cat-o-licious
 ```
 

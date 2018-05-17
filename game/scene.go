@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
-	sdlmix "github.com/veandco/go-sdl2/sdl_mixer"
+	sdlmix "github.com/veandco/go-sdl2/mix"
 )
 
 // Scene is the game scene.
