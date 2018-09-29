@@ -71,3 +71,29 @@ func (c Canvas) SetFont(name, style string) {
 func (c Canvas) DrawText(s string, x, y int) {
 	c.ctx2d.Call("fillText", s, x, y)
 }
+
+// MouseClick ...
+type MouseClick int8
+
+// Mouse clicks ...
+const (
+	MouseUp MouseClick = iota
+	MouseDown
+)
+
+// OnMouse ...
+func (c Canvas) OnMouse(f func(click MouseClick, x, y int)) {
+	pos := func(ev js.Value) (int, int) {
+		x := ev.Get("clientX").Int()
+		y := ev.Get("clientY").Int()
+		return x, y
+	}
+	c.Value.Set("onmousedown", js.NewCallback(func(args []js.Value) {
+		x, y := pos(args[0])
+		f(MouseDown, x, y)
+	}))
+	c.Value.Set("onmouseup", js.NewCallback(func(args []js.Value) {
+		x, y := pos(args[0])
+		f(MouseUp, x, y)
+	}))
+}
