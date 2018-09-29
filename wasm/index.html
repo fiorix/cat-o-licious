@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>cat-o-licious in wasm</title>
+	<style>
+		#canvas {
+		  position:fixed;
+		  width: 100%;
+		  height:100%;
+		  top:0;right:0;bottom:0;left:0;
+		}
+		@font-face {
+			font-family: "Score";
+			src: url("assets/fonts/score.ttf") format('truetype');
+		}
+	  </style>
+</head>
+
+<body>
+	<script src="wasm_exec.js"></script>
+	<script>
+		if (!WebAssembly.instantiateStreaming) { // polyfill
+			WebAssembly.instantiateStreaming = async (resp, importObject) => {
+				const source = await (await resp).arrayBuffer();
+				return await WebAssembly.instantiate(source, importObject);
+			};
+		}
+
+		const go = new Go();
+		WebAssembly.instantiateStreaming(fetch("cat-o-licious.wasm"), go.importObject).then((result) => {
+			go.run(result.instance);
+		});
+
+	</script>
+
+	<canvas id="canvas"/>
+</body>
+
+</html>

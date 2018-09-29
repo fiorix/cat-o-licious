@@ -1,6 +1,12 @@
 # cat-o-licious
 
-This is a simple cat game written in Go and SDL, inspired by [flappy](https://github.com/campoy/flappy/). My kids were too excited to see flappy's source code and wanted to design and code their own game, so that's what we did together in a rainy Sunday.
+This is a simple cat game written in Go, inspired by [flappy](https://github.com/campoy/flappy/). My kids were too excited to see flappy's source code and wanted to design and code their own game, so that's what we did together in a rainy Sunday.
+
+The original version uses SDL (like flappy) and works on MacOS, Linux and Windows.
+
+In the `wasm` directory there's an experimental version in [WebAssembly](https://webassembly.org). Most of the code is copied from the SDL version, except for the media handling parts and lack of audio. This allow kids to play the game in a web browser.
+
+Try [playing in browser](https://fiorix.github.io/cat-o-licious) now!
 
 ![cat-o-licious](assets/screenshot.png)
 
@@ -48,3 +54,14 @@ Run:
 ```
 
 There's a minimal set of command line flags for things like screen resolution, player speed, and FPS.
+
+### WebAssembly
+
+This version has no external dependencies, but requires a web server.
+
+```
+cd wasm
+make
+```
+
+Then use a web server to serve the wasm directory and point your browser there.
