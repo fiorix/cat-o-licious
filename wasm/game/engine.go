@@ -21,7 +21,7 @@ type engine struct {
 func NewEngine(canvasID string) (Engine, error) {
 	canvas := media.GetCanvas(canvasID)
 
-	canvas.SetFont("50px Score", "red")
+	canvas.SetFont("80px Score", "red")
 
 	scene, err := NewScene()
 	if err != nil {
@@ -50,8 +50,8 @@ func (e *engine) Run() {
 	})
 
 	var clicking int32
-
-	e.c.OnMouse(func(click media.MouseClick, x, y int) {
+	handleTouch := true
+	e.c.OnMouse(handleTouch, func(click media.MouseClick, x, y int) {
 		switch click {
 		case media.MouseDown:
 			side := Left
@@ -71,7 +71,7 @@ func (e *engine) Run() {
 			e.s.Player().Move(movingSide, playerSpeed)
 		}
 
-		e.s.Draw(time.Now(), e.c)
+		e.s.Draw(e.c)
 		time.Sleep(1 * time.Second / fps)
 	}
 }

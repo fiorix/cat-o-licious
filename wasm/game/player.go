@@ -119,7 +119,7 @@ func (p *player) Draw(canvas media.Canvas) {
 	}
 	atomic.StoreInt32(&p.x, x)
 	p.y = int32(float32(canvas.ClientH())/1.5) - int32(h/2)
-	r := &media.Rect{X: int(x), Y: int(p.y), W: w, H: h}
+	r := media.Rect{X: int(x), Y: int(p.y), W: w, H: h}
 	hs := DefaultPlayerHitSquare
 	// save player's current hit square position
 	p.hitP = media.Rect{
@@ -130,12 +130,12 @@ func (p *player) Draw(canvas media.Canvas) {
 	}
 	// render player facing default side
 	if p.d == DefaultPlayerSide {
-		canvas.DrawImage(p.img, r.X, r.Y, r.W, r.H)
+		canvas.DrawImage(p.img, r)
 		return
 	}
 	// render player facing the opposide side, then adjust
 	// the hit square X position
-	canvas.DrawImageFlipHorizontal(p.img, r.X, r.Y, r.W, r.H)
+	canvas.DrawImageFlipHorizontal(p.img, r)
 	p.hitP.X = p.hitP.X - int(float32(w)*hs.FlipOffset)
 }
 

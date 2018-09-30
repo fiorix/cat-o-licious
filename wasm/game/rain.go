@@ -11,7 +11,7 @@ import (
 type Rain interface {
 	SetRate(n int)
 	Drops() []Drop
-	Draw(now time.Time, canvas media.Canvas)
+	Draw(canvas media.Canvas)
 }
 
 // Drop ...
@@ -72,10 +72,11 @@ func (r *rain) SetRate(n int) {
 	}
 }
 
-func (r *rain) Draw(now time.Time, canvas media.Canvas) {
-	if now.Sub(r.lastdrop) >= r.delay {
+func (r *rain) Draw(canvas media.Canvas) {
+	t := time.Now()
+	if t.Sub(r.lastdrop) >= r.delay {
 		r.newDrop(canvas)
-		r.lastdrop = now
+		r.lastdrop = t
 	}
 	r.drawAndDrain(canvas)
 }
@@ -140,8 +141,12 @@ type drop struct {
 
 func (d *drop) Draw(canvas media.Canvas) {
 	d.pos.Y = d.pos.Y + d.speed
-	w, h := d.src.img.W(), d.src.img.H()
-	canvas.DrawImage(d.src.img, d.pos.X, d.pos.Y, w, h)
+	canvas.DrawImage(d.src.img, media.Rect{
+		X: d.pos.X,
+		Y: d.pos.Y,
+		W: d.src.img.W(),
+		H: d.src.img.H(),
+	})
 }
 
 func (d *drop) Pos() media.Rect {

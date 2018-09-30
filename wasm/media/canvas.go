@@ -48,22 +48,22 @@ func (c Canvas) ClearRect(r Rect) {
 }
 
 // DrawImage draws an image into the canvas.
-func (c Canvas) DrawImage(img Image, x, y, w, h int) {
-	c.ctx2d.Call("drawImage", img.Value, x, y, w, h)
+func (c Canvas) DrawImage(img Image, r Rect) {
+	c.ctx2d.Call("drawImage", img.Value, r.X, r.Y, r.W, r.H)
 }
 
 // DrawImageFlipHorizontal ...
-func (c Canvas) DrawImageFlipHorizontal(img Image, x, y, w, h int) {
+func (c Canvas) DrawImageFlipHorizontal(img Image, r Rect) {
 	c.ctx2d.Call("save")
-	c.ctx2d.Call("translate", x+w/2, y+h/2)
+	c.ctx2d.Call("translate", r.X+r.W/2, r.Y+r.H/2)
 	c.ctx2d.Call("scale", -1, 1)
-	c.ctx2d.Call("drawImage", img.Value, -w/2, -h/2, w, h)
+	c.ctx2d.Call("drawImage", img.Value, -r.W/2, -r.H/2, r.W, r.H)
 	c.ctx2d.Call("restore")
 }
 
 // SetFont ...
 func (c Canvas) SetFont(name, style string) {
-	c.ctx2d.Set("font", "50px Score")
+	c.ctx2d.Set("font", name)
 	c.ctx2d.Set("fillStyle", style)
 }
 
@@ -81,19 +81,47 @@ const (
 	MouseDown
 )
 
+var mouseClickNames = map[MouseClick]string{
+	MouseUp:   "mouseup",
+	MouseDown: "mousedown",
+}
+
+func (m MouseClick) String() string {
+	return mouseClickNames[m]
+}
+
 // OnMouse ...
-func (c Canvas) OnMouse(f func(click MouseClick, x, y int)) {
+func (c Canvas) OnMouse(mapTouch bool, f func(click MouseClick, x, y int)) {
 	pos := func(ev js.Value) (int, int) {
 		x := ev.Get("clientX").Int()
 		y := ev.Get("clientY").Int()
 		return x, y
 	}
-	c.Value.Set("onmousedown", js.NewCallback(func(args []js.Value) {
-		x, y := pos(args[0])
-		f(MouseDown, x, y)
-	}))
-	c.Value.Set("onmouseup", js.NewCallback(func(args []js.Value) {
-		x, y := pos(args[0])
-		f(MouseUp, x, y)
-	}))
+	for _, ev := range []MouseClick{MouseUp, MouseDown} {
+		ev := ev
+		c.Value.Call("addEventListener", ev.String(), js.NewCallback(func(args []js.Value) {
+			x, y := pos(args[0])
+			f(ev, x, y)
+		}))
+	}
+	if !mapTouch {
+		return
+	}
+	for _, ev := range []struct {
+		touchEv string
+		mouseEv MouseClick
+	}{
+		{"touchstart", MouseDown},
+		{"touchend", MouseUp},
+		{"touchcancel", MouseUp},
+	} {
+		ev := ev
+		c.Value.Call("addEventListener", ev.touchEv, js.NewCallback(func(args []js.Value) {
+			if args[0].Get("touches").Get("length").Int() > 1 {
+				return // ignore multi-touch events
+			}
+			x, y := pos(args[0].Get("changedTouches").Call("item", 0))
+			f(ev.mouseEv, x, y)
+		}))
+	}
 }

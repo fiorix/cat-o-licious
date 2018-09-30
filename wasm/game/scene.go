@@ -9,7 +9,7 @@ import (
 // Scene ...
 type Scene interface {
 	Player() Player
-	Draw(now time.Time, canvas media.Canvas)
+	Draw(canvas media.Canvas)
 }
 
 type scene struct {
@@ -47,16 +47,17 @@ func (s *scene) Player() Player {
 	return s.player
 }
 
-func (s *scene) Draw(now time.Time, canvas media.Canvas) {
-	canvas.ClearRect(media.Rect{
+func (s *scene) Draw(canvas media.Canvas) {
+	r := media.Rect{
 		X: 0,
 		Y: 0,
 		W: canvas.ClientW(),
 		H: canvas.ClientH(),
-	})
-	canvas.DrawImage(s.bg, 0, 0, canvas.ClientW(), canvas.ClientH())
+	}
+	canvas.ClearRect(r)
+	canvas.DrawImage(s.bg, r)
 	s.player.Draw(canvas)
-	s.rain.Draw(now, canvas)
+	s.rain.Draw(canvas)
 	s.score.Draw(canvas)
 	hit := false
 	for _, drop := range s.rain.Drops() {
@@ -65,10 +66,11 @@ func (s *scene) Draw(now time.Time, canvas media.Canvas) {
 			hit = true
 		}
 	}
-	if !hit || now.Sub(s.lastUpdate) < time.Second {
+	t := time.Now()
+	if !hit || t.Sub(s.lastUpdate) < time.Second {
 		return
 	}
-	s.lastUpdate = now
+	s.lastUpdate = t
 	p := s.score.Points()
 	rate := (int(p) / 1000) + 1
 	s.rain.SetRate(rate)
