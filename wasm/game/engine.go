@@ -21,6 +21,9 @@ type engine struct {
 func NewEngine(canvasID string) (Engine, error) {
 	canvas := media.GetCanvas(canvasID)
 
+	canvas.SetFont("40px Score", "red")
+	canvas.DrawText("Loading assets, please wait...", 20, 50)
+
 	canvas.SetFont("80px Score", "red")
 
 	scene, err := NewScene()

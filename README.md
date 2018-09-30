@@ -65,3 +65,5 @@ make
 ```
 
 Then use a web server to serve the wasm directory and point your browser there.
+
+For local test/dev you can use server.go in the wasm directory.
