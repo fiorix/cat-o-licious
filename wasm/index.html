@@ -28,10 +28,14 @@
 			};
 		}
 
-		const go = new Go();
-		WebAssembly.instantiateStreaming(fetch("cat-o-licious.wasm"), go.importObject).then((result) => {
-			go.run(result.instance);
-		});
+		(function() {
+			const go = new Go();
+			WebAssembly.instantiateStreaming(fetch("cat-o-licious.wasm"), go.importObject).then((result) => {
+				console.clear();
+				go.run(result.instance);
+				WebAssembly.instantiate(result.module, go.importObject); // reset instance
+			});
+		})();
 
 	</script>
 
