@@ -1,6 +1,6 @@
 # cat-o-licious
 
-This is a simple cat game written in Go, inspired by [flappy](https://github.com/campoy/flappy/). My kids were too excited to see flappy's source code and wanted to design and code their own game, so that's what we did together in a rainy Sunday.
+This is a simple cat game written in Go, inspired by [flappy](https://github.com/campoy/flappy/). My kids were too excited to see flappy's source code and wanted to design and code their own game, so that's what we did together on a rainy Sunday.
 
 The original version uses SDL (like flappy) and works on MacOS, Linux and Windows.
 
