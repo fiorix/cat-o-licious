@@ -57,7 +57,6 @@ func (e *engine) Run() {
 	e.c.OnMouse(handleTouch, func(click media.MouseClick, x, y int) {
 		switch click {
 		case media.MouseDown:
-			media.ResumeAudioContext()
 			side := Left
 			if x > e.c.ClientW()/2 {
 				side = Right
