@@ -17,10 +17,11 @@ const (
 // OnKey ...
 func OnKey(ev KeyEvent, f func(key string)) {
 	doc := js.Global().Get("document")
-	doc.Call("addEventListener", string(ev), js.NewCallback(func(args []js.Value) {
+	doc.Call("addEventListener", string(ev), js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		if len(args) == 0 {
-			return
+			return nil
 		}
 		f(args[0].Get("key").String())
+		return nil
 	}))
 }

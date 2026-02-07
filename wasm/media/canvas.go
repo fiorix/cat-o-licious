@@ -99,9 +99,10 @@ func (c Canvas) OnMouse(mapTouch bool, f func(click MouseClick, x, y int)) {
 	}
 	for _, ev := range []MouseClick{MouseUp, MouseDown} {
 		ev := ev
-		c.Value.Call("addEventListener", ev.String(), js.NewCallback(func(args []js.Value) {
+		c.Value.Call("addEventListener", ev.String(), js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			x, y := pos(args[0])
 			f(ev, x, y)
+			return nil
 		}))
 	}
 	if !mapTouch {
@@ -116,12 +117,13 @@ func (c Canvas) OnMouse(mapTouch bool, f func(click MouseClick, x, y int)) {
 		{"touchcancel", MouseUp},
 	} {
 		ev := ev
-		c.Value.Call("addEventListener", ev.touchEv, js.NewCallback(func(args []js.Value) {
+		c.Value.Call("addEventListener", ev.touchEv, js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			if args[0].Get("touches").Get("length").Int() > 1 {
-				return // ignore multi-touch events
+				return nil // ignore multi-touch events
 			}
 			x, y := pos(args[0].Get("changedTouches").Call("item", 0))
 			f(ev.mouseEv, x, y)
+			return nil
 		}))
 	}
 }

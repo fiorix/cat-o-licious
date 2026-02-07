@@ -58,6 +58,7 @@ type player struct {
 	d    Direction     // facing side
 	hitP media.Rect    // hit area of the player
 	hitC int           // hit counter to swap image for N frames
+	sfx  []media.Audio // available sfx
 }
 
 // NewPlayer creates and initializes a new player.
@@ -69,10 +70,19 @@ func NewPlayer() (Player, error) {
 	if len(imgs) < 3 {
 		return nil, errors.New("need at least 3 player frames")
 	}
+	sfxwin, err := media.NewAudio("assets/snd/score_win_1.wav")
+	if err != nil {
+		return nil, err
+	}
+	sfxlose, err := media.NewAudio("assets/snd/score_lose_1.wav")
+	if err != nil {
+		return nil, err
+	}
 	p := &player{
 		imgs: imgs,
 		img:  imgs[moving],
 		d:    Center,
+		sfx:  []media.Audio{{}, sfxwin, sfxlose},
 	}
 	return p, nil
 }
@@ -152,10 +162,10 @@ func (p *player) Hit(d Drop) bool {
 	p.hitC = 1
 	if d.Points() > 0 {
 		p.img = p.imgs[winning]
-		//		p.sfx[winning].Play(1, 0)
+		p.sfx[winning].Play()
 	} else {
 		p.img = p.imgs[losing]
-		//		p.sfx[losing].Play(1, 0)
+		p.sfx[losing].Play()
 	}
 	return true
 }

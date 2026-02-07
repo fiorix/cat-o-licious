@@ -18,28 +18,33 @@ func NewImage(uri, alt string) (Image, error) {
 
 	errc := make(chan error, 1)
 
-	img.Set("onload", js.NewCallback(func(args []js.Value) {
+	img.Set("onload", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		close(errc)
+		return nil
 	}))
 
-	img.Set("onabort", js.NewCallback(func(args []js.Value) {
+	img.Set("onabort", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		errc <- fmt.Errorf("aborted: %s", uri)
 		close(errc)
+		return nil
 	}))
 
-	img.Set("onstalled", js.NewCallback(func(args []js.Value) {
+	img.Set("onstalled", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		errc <- fmt.Errorf("stalled: %s", uri)
 		close(errc)
+		return nil
 	}))
 
-	img.Set("onsuspend", js.NewCallback(func(args []js.Value) {
+	img.Set("onsuspend", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		errc <- fmt.Errorf("suspended: %s", uri)
 		close(errc)
+		return nil
 	}))
 
-	img.Set("onerror", js.NewCallback(func(args []js.Value) {
+	img.Set("onerror", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		errc <- fmt.Errorf("failed: %s", uri)
 		defer close(errc)
+		return nil
 	}))
 
 	img.Set("src", uri)

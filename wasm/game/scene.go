@@ -18,6 +18,7 @@ type scene struct {
 	rain       Rain
 	player     Player
 	score      Scoreboard
+	mus        media.Audio
 }
 
 // NewScene ...
@@ -34,11 +35,16 @@ func NewScene() (Scene, error) {
 	if err != nil {
 		return nil, err
 	}
+	mus, err := media.NewAudio("assets/snd/music_1.wav")
+	if err != nil {
+		return nil, err
+	}
 	s := &scene{
 		bg:     bg,
 		rain:   rain,
 		player: player,
 		score:  NewScoreboard(),
+		mus:    mus,
 	}
 	return s, nil
 }
@@ -55,6 +61,9 @@ func (s *scene) Draw(canvas media.Canvas) {
 		H: canvas.ClientH(),
 	}
 	canvas.ClearRect(r)
+	if !s.mus.Playing() {
+		s.mus.PlayLoop()
+	}
 	canvas.DrawImage(s.bg, r)
 	s.player.Draw(canvas)
 	s.rain.Draw(canvas)
