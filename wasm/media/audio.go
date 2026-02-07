@@ -90,6 +90,9 @@ func (a Audio) Play() {
 		return
 	}
 	ctx := getAudioContext()
+	if ctx.Get("state").String() != "running" {
+		return
+	}
 	source := ctx.Call("createBufferSource")
 	source.Set("buffer", a.state.buffer)
 	source.Call("connect", ctx.Get("destination"))
@@ -102,6 +105,9 @@ func (a Audio) PlayLoop() {
 		return
 	}
 	ctx := getAudioContext()
+	if ctx.Get("state").String() != "running" {
+		return
+	}
 	source := ctx.Call("createBufferSource")
 	source.Set("buffer", a.state.buffer)
 	source.Set("loop", true)
