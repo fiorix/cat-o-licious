@@ -10,15 +10,42 @@ import (
 type Scene interface {
 	Player() Player
 	Draw(canvas media.Canvas)
+	EnableAudio()
+}
+
+func (s *scene) EnableAudio() {
+	s.audioEnabled = true
+	s.player.EnableAudio()
+}
+
+func (s *scene) handleMusic() {
+	if !s.audioEnabled {
+		return
+	}
+	if s.musicStarted {
+		if s.mus.Playing() {
+			return
+		}
+		s.musicStarted = false
+	}
+	s.mus.PlayLoop()
+	s.musicStarted = true
+}
+
+func (s *scene) drawAudioPrompt(canvas media.Canvas) {
+	canvas.SetFont("32px Score", "#ffd700")
+	canvas.DrawText("Click or press to enable sound", 40, 80)
 }
 
 type scene struct {
-	lastUpdate time.Time
-	bg         media.Image
-	rain       Rain
-	player     Player
-	score      Scoreboard
-	mus        media.Audio
+	lastUpdate   time.Time
+	bg           media.Image
+	rain         Rain
+	player       Player
+	score        Scoreboard
+	mus          media.Audio
+	audioEnabled bool
+	musicStarted bool
 }
 
 // NewScene ...
@@ -61,12 +88,14 @@ func (s *scene) Draw(canvas media.Canvas) {
 		H: canvas.ClientH(),
 	}
 	canvas.ClearRect(r)
-	if !s.mus.Playing() {
-		s.mus.PlayLoop()
-	}
 	canvas.DrawImage(s.bg, r)
+	s.handleMusic()
+	if !s.audioEnabled {
+		s.drawAudioPrompt(canvas)
+	}
 	s.player.Draw(canvas)
 	s.rain.Draw(canvas)
+	canvas.SetFont("80px Score", "red")
 	s.score.Draw(canvas)
 	hit := false
 	for _, drop := range s.rain.Drops() {
