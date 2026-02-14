@@ -131,28 +131,26 @@ func (r *rain) newDrop(viewport *sdl.Rect) {
 // drawAndDrain draws drops that are within the viewport and drains
 // drops that placed past the height of the viewport.
 func (r *rain) drawAndDrain(viewport *sdl.Rect) {
-	rmset := make(map[int]struct{})
-	for i, d := range r.drops {
+	// Use a single-pass, in-place filter to draw and drain drops.
+	// This avoids allocating a map and a new slice on every frame.
+	// Important: clear the tail so drained drops aren't retained by the backing array.
+	orig := r.drops
+	kept := orig[:0]
+
+	for _, d := range orig {
 		if d.pos.Y > viewport.H {
-			rmset[i] = struct{}{}
-			continue
+			continue // Drop is off-screen, drain it.
 		}
 		d.Draw(viewport)
+		kept = append(kept, d)
 	}
-	if len(rmset) == 0 {
-		return
+
+	// Clear tail to avoid loitering (retain pointers to drained drops).
+	for i := len(kept); i < len(orig); i++ {
+		orig[i] = nil
 	}
-	// drain
-	drops := make([]*drop, len(r.drops)-len(rmset))
-	j := 0
-	for i, d := range r.drops {
-		if _, skip := rmset[i]; skip {
-			continue
-		}
-		drops[j] = d
-		j++
-	}
-	r.drops = drops
+
+	r.drops = kept
 }
 
 // Drops implement the Rain interface.

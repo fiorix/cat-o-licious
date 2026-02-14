@@ -102,27 +102,26 @@ func (r *rain) newDrop(canvas media.Canvas) {
 }
 
 func (r *rain) drawAndDrain(canvas media.Canvas) {
-	rmset := make(map[int]struct{})
-	for i, d := range r.drops {
+	// Use a single-pass, in-place filter to draw and drain drops.
+	// This avoids allocating a map and a new slice on every frame.
+	// Important: clear the tail so drained drops aren't retained by the backing array.
+	orig := r.drops
+	kept := orig[:0]
+
+	for _, d := range orig {
 		if d.pos.Y > canvas.ClientH() {
-			rmset[i] = struct{}{}
-			continue
+			continue // Drop is off-screen, drain it.
 		}
 		d.Draw(canvas)
+		kept = append(kept, d)
 	}
-	if len(rmset) == 0 {
-		return
+
+	// Clear tail to avoid loitering (retain pointers to drained drops).
+	for i := len(kept); i < len(orig); i++ {
+		orig[i] = nil
 	}
-	drops := make([]*drop, len(r.drops)-len(rmset))
-	j := 0
-	for i, d := range r.drops {
-		if _, skip := rmset[i]; skip {
-			continue
-		}
-		drops[j] = d
-		j++
-	}
-	r.drops = drops
+
+	r.drops = kept
 }
 
 func (r *rain) Drops() []Drop {
