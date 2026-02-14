@@ -42,5 +42,13 @@ func (sb *scoreboard) Points() int64 {
 func (sb *scoreboard) Draw(canvas media.Canvas) {
 	p := atomic.LoadInt64(&sb.points)
 	text := fmt.Sprintf("%d", p)
-	canvas.DrawText(text, 100, 100)
+
+	// Right-align using current canvas font.
+	const margin = 40
+	w := canvas.MeasureTextWidth(text)
+	x := canvas.ClientW() - w - margin
+	if x < margin {
+		x = margin
+	}
+	canvas.DrawText(text, x, 100)
 }

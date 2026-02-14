@@ -72,6 +72,13 @@ func (c Canvas) DrawText(s string, x, y int) {
 	c.ctx2d.Call("fillText", s, x, y)
 }
 
+// MeasureTextWidth returns the rendered pixel width of the given string using the current canvas font.
+func (c Canvas) MeasureTextWidth(s string) int {
+	m := c.ctx2d.Call("measureText", s)
+	// CanvasTextMetrics.width is a float.
+	return int(m.Get("width").Float())
+}
+
 // MouseClick ...
 type MouseClick int8
 

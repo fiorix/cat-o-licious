@@ -12,9 +12,16 @@ type Engine interface {
 	Run()
 }
 
+func (e *engine) unlockAudio() {
+	if atomic.CompareAndSwapInt32(&e.audioUnlocked, 0, 1) {
+		e.s.EnableAudio()
+	}
+}
+
 type engine struct {
-	c media.Canvas
-	s Scene
+	c             media.Canvas
+	s             Scene
+	audioUnlocked int32
 }
 
 // NewEngine ...
@@ -44,6 +51,7 @@ func (e *engine) Run() {
 	const playerSpeed = 20
 
 	media.OnKey(media.KeyDown, func(key string) {
+		e.unlockAudio()
 		switch key {
 		case "a", "A", "ArrowLeft":
 			e.s.Player().Move(Left, playerSpeed)
@@ -57,6 +65,7 @@ func (e *engine) Run() {
 	e.c.OnMouse(handleTouch, func(click media.MouseClick, x, y int) {
 		switch click {
 		case media.MouseDown:
+			e.unlockAudio()
 			side := Left
 			if x > e.c.ClientW()/2 {
 				side = Right

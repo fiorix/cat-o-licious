@@ -41,6 +41,9 @@ type Player interface {
 
 	// Draw draws the player.
 	Draw(canvas media.Canvas)
+
+	// EnableAudio enables audio playback (SFX gating under browser policies).
+	EnableAudio()
 }
 
 // players need at least 3 images, loaded in the following sequence:
@@ -59,6 +62,8 @@ type player struct {
 	hitP media.Rect    // hit area of the player
 	hitC int           // hit counter to swap image for N frames
 	sfx  []media.Audio // available sfx
+
+	audioEnabled bool
 }
 
 // NewPlayer creates and initializes a new player.
@@ -85,6 +90,10 @@ func NewPlayer() (Player, error) {
 		sfx:  []media.Audio{{}, sfxwin, sfxlose},
 	}
 	return p, nil
+}
+
+func (p *player) EnableAudio() {
+	p.audioEnabled = true
 }
 
 // Move implements the Player interface.
@@ -162,10 +171,14 @@ func (p *player) Hit(d Drop) bool {
 	p.hitC = 1
 	if d.Points() > 0 {
 		p.img = p.imgs[winning]
-		p.sfx[winning].Play()
+		if p.audioEnabled {
+			p.sfx[winning].Play()
+		}
 	} else {
 		p.img = p.imgs[losing]
-		p.sfx[losing].Play()
+		if p.audioEnabled {
+			p.sfx[losing].Play()
+		}
 	}
 	return true
 }
