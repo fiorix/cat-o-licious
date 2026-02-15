@@ -6,6 +6,9 @@
 package game
 
 import (
+	"log"
+	"os"
+	"runtime"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -29,11 +32,36 @@ type engine struct {
 
 // NewEngine creates and initializes a new game engine.
 func NewEngine(c *Config) (Engine, error) {
+	renderDriver := os.Getenv("SDL_RENDER_DRIVER")
+	userSelectedRenderer := renderDriver != ""
+	if renderDriver == "" {
+		renderDriver = "software"
+		if runtime.GOOS == "linux" {
+			renderDriver = "opengl"
+		}
+		sdl.SetHint(sdl.HINT_RENDER_DRIVER, renderDriver)
+	}
+	videoDriver, err := sdl.GetCurrentVideoDriver()
+	if err != nil {
+		videoDriver = "unknown"
+	}
+	log.Printf("SDL video driver=%q render driver=%q", videoDriver, renderDriver)
+
 	w, r, err := sdl.CreateWindowAndRenderer(
 		int32(c.Width),
 		int32(c.Height),
 		sdl.WINDOW_SHOWN,
 	)
+	if err != nil && !userSelectedRenderer && runtime.GOOS == "linux" && renderDriver == "opengl" {
+		log.Printf("failed to create opengl renderer, falling back to software: %v", err)
+		renderDriver = "software"
+		sdl.SetHint(sdl.HINT_RENDER_DRIVER, renderDriver)
+		w, r, err = sdl.CreateWindowAndRenderer(
+			int32(c.Width),
+			int32(c.Height),
+			sdl.WINDOW_SHOWN,
+		)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -47,50 +75,32 @@ func NewEngine(c *Config) (Engine, error) {
 
 // Run implements the Engine interface.
 func (e *engine) Run() {
-	stop := make(chan struct{})
-	go e.Draw(stop)
-	e.HandleInput()
-	close(stop)
-}
-
-// Draw draws frames at a given FPS.
-func (e *engine) Draw(stop chan struct{}) {
-	var viewport sdl.Rect
-	fps := uint32(e.c.FPS)
-loop:
-	for {
-		select {
-		case <-stop:
-			break loop
-		default:
-		}
-		viewport = e.r.GetViewport()
-		e.s.Draw(time.Now(), &viewport)
-		e.r.Present()
-		sdl.Delay(1000 / fps)
-	}
-}
-
-// HandleInput handles keyboard input.
-func (e *engine) HandleInput() {
 	p := e.s.Player()
 	playerSpeed := int32(e.c.PlayerSpeed)
 	fullscreen := false
-loop:
+	var viewport sdl.Rect
+	fps := uint32(e.c.FPS)
+	frameDelay := uint32(1000 / fps)
+
+	running := true
 	for {
-		ev := sdl.WaitEvent()
-		if ev == nil { // cgo barfed here before
-			sdl.Delay(1000)
-			continue
+		if !running {
+			break
 		}
-		switch t := ev.(type) {
-		case *sdl.QuitEvent:
-			break loop
-		case *sdl.KeyboardEvent:
-			if t.State == sdl.PRESSED {
-				switch ev.(*sdl.KeyboardEvent).Keysym.Sym {
+		frameStart := sdl.GetTicks()
+
+		// 1. Handle Input (Main Thread)
+		for ev := sdl.PollEvent(); ev != nil; ev = sdl.PollEvent() {
+			switch t := ev.(type) {
+			case *sdl.QuitEvent:
+				running = false
+			case *sdl.KeyboardEvent:
+				if t.State != sdl.PRESSED {
+					continue
+				}
+				switch t.Keysym.Sym {
 				case sdl.K_q:
-					break loop
+					running = false
 				case sdl.K_f:
 					if fullscreen {
 						e.w.SetFullscreen(0)
@@ -104,6 +114,17 @@ loop:
 					p.Move(Right, playerSpeed)
 				}
 			}
+		}
+
+		// 2. Draw (Main Thread)
+		viewport = e.r.GetViewport()
+		e.s.Draw(time.Now(), &viewport)
+		e.r.Present()
+
+		// 3. Frame Rate Control
+		frameElapsed := sdl.GetTicks() - frameStart
+		if frameElapsed < frameDelay {
+			sdl.Delay(frameDelay - frameElapsed)
 		}
 	}
 }
