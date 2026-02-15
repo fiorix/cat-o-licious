@@ -99,7 +99,11 @@ func (s *scene) Draw(canvas media.Canvas) {
 	s.score.Draw(canvas)
 	hit := false
 	for _, drop := range s.rain.Drops() {
+		if drop.Consumed() {
+			continue
+		}
 		if s.player.Hit(drop) {
+			drop.Consume()
 			s.score.Add(drop.Points())
 			hit = true
 		}

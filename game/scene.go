@@ -78,7 +78,11 @@ func (s *scene) Draw(now time.Time, viewport *sdl.Rect) {
 	s.rain.Draw(now, viewport)
 	hit := false
 	for _, drop := range s.rain.Drops() {
+		if drop.Consumed() {
+			continue
+		}
 		if s.player.Hit(drop) {
+			drop.Consume()
 			s.score.Add(drop.Points())
 			hit = true
 		}
