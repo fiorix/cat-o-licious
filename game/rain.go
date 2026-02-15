@@ -33,6 +33,12 @@ type Drop interface {
 	// Points returns delta points for the drop. Good drops
 	// return positive numbers while bad drops return negative.
 	Points() int64
+
+	// Consume marks the drop as consumed by the player.
+	Consume()
+
+	// Consumed returns true if the drop has been consumed.
+	Consumed() bool
 }
 
 // rain implements the Rain interface.
@@ -138,8 +144,8 @@ func (r *rain) drawAndDrain(viewport *sdl.Rect) {
 	kept := orig[:0]
 
 	for _, d := range orig {
-		if d.pos.Y > viewport.H {
-			continue // Drop is off-screen, drain it.
+		if d.pos.Y > viewport.H || d.consumed {
+			continue // Drop is off-screen or consumed, drain it.
 		}
 		d.Draw(viewport)
 		kept = append(kept, d)
@@ -164,9 +170,10 @@ func (r *rain) Drops() []Drop {
 
 // drop is a single drop of rain, that falls from top to bottom.
 type drop struct {
-	src   *raindrop
-	pos   *sdl.Rect
-	speed int32
+	src      *raindrop
+	pos      *sdl.Rect
+	speed    int32
+	consumed bool
 }
 
 // Draw draws the drop incrementing its Y position at a given speed.
@@ -183,4 +190,14 @@ func (d *drop) Pos() sdl.Rect {
 // Points implements the Drop interface.
 func (d *drop) Points() int64 {
 	return d.src.points
+}
+
+// Consume implements the Drop interface.
+func (d *drop) Consume() {
+	d.consumed = true
+}
+
+// Consumed implements the Drop interface.
+func (d *drop) Consumed() bool {
+	return d.consumed
 }

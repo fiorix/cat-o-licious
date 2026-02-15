@@ -18,6 +18,8 @@ type Rain interface {
 type Drop interface {
 	Pos() media.Rect
 	Points() int64
+	Consume()
+	Consumed() bool
 }
 
 // NewRain ...
@@ -109,8 +111,8 @@ func (r *rain) drawAndDrain(canvas media.Canvas) {
 	kept := orig[:0]
 
 	for _, d := range orig {
-		if d.pos.Y > canvas.ClientH() {
-			continue // Drop is off-screen, drain it.
+		if d.pos.Y > canvas.ClientH() || d.consumed {
+			continue // Drop is off-screen or consumed, drain it.
 		}
 		d.Draw(canvas)
 		kept = append(kept, d)
@@ -133,9 +135,10 @@ func (r *rain) Drops() []Drop {
 }
 
 type drop struct {
-	src   *raindrop
-	pos   media.Rect
-	speed int
+	src      *raindrop
+	pos      media.Rect
+	speed    int
+	consumed bool
 }
 
 func (d *drop) Draw(canvas media.Canvas) {
@@ -154,4 +157,12 @@ func (d *drop) Pos() media.Rect {
 
 func (d *drop) Points() int64 {
 	return d.src.points
+}
+
+func (d *drop) Consume() {
+	d.consumed = true
+}
+
+func (d *drop) Consumed() bool {
+	return d.consumed
 }
