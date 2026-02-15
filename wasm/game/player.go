@@ -3,7 +3,6 @@ package game
 import (
 	"errors"
 	"sync/atomic"
-	"time"
 
 	"github.com/fiorix/cat-o-licious/wasm/media"
 )
@@ -54,8 +53,6 @@ const (
 	losing  = 2
 )
 
-const sfxCooldown = 150 * time.Millisecond
-
 type player struct {
 	imgs []media.Image // available images
 	img  media.Image   // current player image
@@ -67,8 +64,6 @@ type player struct {
 	sfx  []media.Audio // available sfx
 
 	audioEnabled bool
-	lastSFX      time.Time
-	now          func() time.Time
 }
 
 // NewPlayer creates and initializes a new player.
@@ -93,7 +88,6 @@ func NewPlayer() (Player, error) {
 		img:  imgs[moving],
 		d:    Center,
 		sfx:  []media.Audio{{}, sfxwin, sfxlose},
-		now:  time.Now,
 	}
 	return p, nil
 }
@@ -164,13 +158,6 @@ func (p *player) Draw(canvas media.Canvas) {
 	p.hitP.X = p.hitP.X - int(float32(w)*hs.FlipOffset)
 }
 
-func (p *player) shouldPlaySFX() bool {
-	if !p.audioEnabled {
-		return false
-	}
-	return p.now().Sub(p.lastSFX) >= sfxCooldown
-}
-
 // Hit implements the Player interface.
 func (p *player) Hit(d Drop) bool {
 	hit := p.hitP
@@ -182,19 +169,15 @@ func (p *player) Hit(d Drop) bool {
 		return false
 	}
 	p.hitC = 1
-
-	play := p.shouldPlaySFX()
 	if d.Points() > 0 {
 		p.img = p.imgs[winning]
-		if play {
+		if p.audioEnabled {
 			p.sfx[winning].Play()
-			p.lastSFX = p.now()
 		}
 	} else {
 		p.img = p.imgs[losing]
-		if play {
+		if p.audioEnabled {
 			p.sfx[losing].Play()
-			p.lastSFX = p.now()
 		}
 	}
 	return true
